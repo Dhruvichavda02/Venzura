@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Venzura </title>
+    <title>Venzura</title>
     <link href="https://fonts.googleapis.com/css2?family=Playfair+Display&family=Poppins:wght@300;400&display=swap" rel="stylesheet">
     <style>
         * {
@@ -13,7 +13,7 @@
             font-family: 'Playfair Display', serif;
         }
         body {
-            background-color: ##ffffff;
+            background-color: #ffffff;
         }
         .navbar {
             display: flex;
@@ -25,8 +25,7 @@
         }
         .logo {
             font-size: 24px;
-            font-family: 'Playfair Display', serif;
-            font-weight: normal; /* Removed bold */
+            font-weight: normal;
         }
         .nav-links {
             list-style: none;
@@ -40,10 +39,15 @@
             text-decoration: none;
             color: black;
             font-size: 16px;
-            font-weight: normal; /* Removed bold */
+            font-weight: normal;
         }
         .nav-links a:hover {
             text-decoration: underline;
+        }
+        .nav-right {
+            display: flex;
+            align-items: center;
+            gap: 20px;
         }
         .profile-icon {
             width: 35px;
@@ -53,11 +57,25 @@
             display: flex;
             justify-content: center;
             align-items: center;
+            cursor: pointer;
         }
         .profile-icon img {
             width: 20px;
             height: 20px;
             filter: invert(100%);
+        }
+        .login-btn {
+            padding: 8px 16px;
+            background-color:black;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            font-size: 16px;
+            cursor: pointer;
+            transition: 0.3s;
+        }
+        .login-btn:hover {
+            background-color: #333333;
         }
         /* Responsive Design */
         @media (max-width: 768px) {
@@ -69,6 +87,11 @@
                 flex-direction: column;
                 padding: 10px 0;
                 gap: 10px;
+            }
+            .nav-right {
+                flex-direction: column;
+                gap: 10px;
+                margin-top: 10px;
             }
         }
     </style>
@@ -84,18 +107,22 @@
             <li><a href="Music.jsp">Musician/Host</a></li>
             <li><a href="About.jsp">About</a></li>
         </ul>
-      <div class="profile-icon" onclick="redirectToAccount()">
-    <img src="https://img.icons8.com/ios-filled/50/user.png" alt="Profile">
-</div>
-
-<script>
-    function redirectToAccount() {
-        window.location.href = "Account.jsp";
-    }
-</script>
-
-
+        <div class="nav-right">
+            <button class="login-btn" onclick="redirectToLogin()">Login</button>
+            <div class="profile-icon" onclick="redirectToAccount()">
+                <img src="https://img.icons8.com/ios-filled/50/user.png" alt="Profile">
+            </div>
+        </div>
     </nav>
+
+    <script>
+        function redirectToAccount() {
+            window.location.href = "Account.jsp";
+        }
+        function redirectToLogin() {
+        	 window.location.href = "../Signup.jsp";
+        }
+    </script>
 
 </body>
 </html>

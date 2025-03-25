@@ -161,12 +161,13 @@ font-size: 30px;
         <li onclick="redirectToM()"><i class="fas fa-circle"></i> <span>Music/Host</span></li>
         <li onclick="redirectToPay()"><i class="fas fa-credit-card"></i> <span>Payments</span></li>
         <li onclick="redirectToRole()"><i class="fas fa-user"></i> <span>Roles</span></li>
+         <li onclick="redirectToCategory()"><i class="fas fa-user"></i> <span>Category</span></li>
 
         <!-- Modifications Dropdown -->
         <li onclick="toggleModificationsDropdown()">
             <i class="fas fa-pencil-alt"></i> <span>Modifications</span>
         </li>
-        <ul class="dropdown" id="modificationsDropdown">
+        <ul class='dropdown' id='modificationsDropdown'>
             <li onclick="redirectToChangeHome()">Home</li>
             <li onclick="redirectToChangeAbout()">About</li>
         </ul>
@@ -207,7 +208,11 @@ function redirectToChangeAbout() { window.location.href = "ChangeAbout.jsp"; }
 function redirectToM() { window.location.href = "Musician.jsp"; }
 function redirectToAccount() { window.location.href = "Account.jsp"; }
 function redirectToDas() { window.location.href = "Home.jsp"; }
+function redirectToCategory() {window.location.href = "Category.jsp;"}
 </script>
 
 </body>
 </html>
+
+
+

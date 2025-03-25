@@ -4,16 +4,14 @@
 <html>
 <head>
 <meta charset="UTF-8">
-<title>Venzura</title>
-    <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;700&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;700&display=swap" rel="stylesheet">
 
-     <style>
+    <style>
         * {
             margin: 0;
             padding: 0;
             box-sizing: border-box;
-            font-family: 'Playfair Display', serif;
-        }
+ 			font-family: 'Playfair Display', serif;        }
         body {
             display: flex;
             justify-content: center;
@@ -28,7 +26,6 @@
             width: 100vw;
             height: 100vh;
             box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
-            border-radius: 0;
             overflow: hidden;
             background: #fff;
         }
@@ -43,20 +40,13 @@
             align-items: center;
             text-align: center;
         }
-        .left-panel h2 {
-            margin-bottom: 20px;
+        .left-panel h1 {
+            font-size: 2rem;
+            margin-bottom: 10px;
         }
-        .left-panel button {
-            background: #fff;
-            color: #000;
-            padding: 10px 20px;
-            border: none;
-            cursor: pointer;
-            border-radius: 5px;
-            margin-top: 10px;
-        }
-        .left-panel button:hover {
-            background: #ccc;
+        .left-panel p {
+            font-size: 14px;
+            max-width: 300px;
         }
         .right-panel {
             flex: 1;
@@ -101,22 +91,53 @@
     </style>
 </head>
 <body>
+<form action="LoginServlet" method="post" onsubmit="return validate()">
     <div class="container">
         <div class="left-panel">
-            <h2>Start New Journey!</h2>
-            <p>Already have an account?</p>
-            <button onclick="window.location.href='Login.jsp'">Sign In</button>
+            <h1>Venzura</h1>
+            <p>Your One-Stop Destination for Venues, Vibes, and Visions</p>
         </div>
         <div class="right-panel">
-            <h2>Create Account</h2>
-            <img src="https://img.icons8.com/color/48/000000/google-logo.png" alt="Google Sign In" width="30">
-            <p>or use your email account</p>
-            <input type="text" placeholder="Name" class="input-box">
-            <input type="email" placeholder="Email" class="input-box">
-            <input type="password" placeholder="Password" class="input-box">
-            <p class="forgot-password">Forgot your password?</p>
-            <button onclick="window.location.href='Login.jsp'">Sign Up</button>
+            <h2>Sign in to Venzura</h2>
+
+            <input type="email" placeholder="Email" class="input-box" id="email" name="email">
+            <input type="password" placeholder="Password" class="input-box" id="password" name="password">
+
+            <div id="Error" class="error" style="display:none; color:red;">Enter both fields</div>
+
+           <p class="forgot-password">
+    <a href="ForgotPassword.jsp">Forgot your password?</a>
+</p>
+
+            <!-- Corrected: This button submits the form only if validation passes -->
+            <button type="submit">Sign In</button>
         </div>
     </div>
+</form>
+
+<script>
+    function validate() {
+        let email = document.getElementById('email').value.trim();
+        let password = document.getElementById('password').value.trim();
+
+        if (email === "" || password === "") {
+            document.getElementById('Error').style.display = "block";
+            return false; // Prevent form submission
+        } else {
+            document.getElementById('Error').style.display = "none";
+            return true; // Allow form submission
+        }
+    }
+    
+ // Show alert if there is an error message
+    window.onload = function() {
+        var errorMessage = "<%= (session.getAttribute("errorMessage") != null) ? session.getAttribute("errorMessage") : "" %>";
+        if (errorMessage !== "") {
+            alert(errorMessage);
+            <% session.removeAttribute("errorMessage"); %> // Remove error message after displaying
+        }
+    };
+</script>
+
 </body>
 </html>
