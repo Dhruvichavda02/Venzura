@@ -143,27 +143,27 @@
             <form>
                 <div class="form-group">
                     <label>User Name:</label>
-                    <input type="text">
+                     <input type="text" name="name" id="name" >
                 </div>
 
                 <div class="form-group">
                     <label>User Email:</label>
-                    <input type="email">
+                    <input type="email" name="email" id="email">
                 </div>
 
                 <div class="form-group">
                     <label>User Phone Number:</label>
-                    <input type="number">
+                    <input type="number" name="phone" id="phone" >
                 </div>
 
                 <div class="form-group">
                     <label>User City:</label>
-                    <input type="text">
+                   <input type="text" name="city" id="city" >
                 </div>
 
-                <div class="form-group">
+                 <div class="form-group">
                     <label>User Role:</label>
-                    <select>
+                    <select name="role" id="role" required>
                         <option value="user">User</option>
                         <option value="admin">Admin</option>
                     </select>
@@ -186,6 +186,59 @@
                 content.classList.add('full-width');
             }
         }
+     
+        document.getElementById("addUserForm").addEventListener("submit", function(event) {
+            event.preventDefault(); // Prevent page reload
+
+            let name = document.getElementById("name").value.trim();
+            let email = document.getElementById("email").value.trim();
+            let phone = document.getElementById("phone").value.trim();
+            let city = document.getElementById("city").value.trim();
+            let role = document.getElementById("role").value;
+
+            // Validation
+            if (name.length < 3) {
+                alert("Name must be at least 3 characters long.");
+                return;
+            }
+            if (!/^[a-zA-Z\s]+$/.test(name)) {
+                alert("Name must only contain letters.");
+                return;
+            }
+            if (!/^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/.test(email)) {
+                alert("Enter a valid email address.");
+                return;
+            }
+            if (!/^[0-9]{10}$/.test(phone)) {
+                alert("Phone number must be exactly 10 digits.");
+                return;
+            }
+            if (city.length < 2) {
+                alert("City name must be at least 2 letters long.");
+                return;
+            }
+
+            let formData = new FormData(this);
+
+            // AJAX Request
+            fetch("AddUser.jsp", {
+                method: "POST",
+                body: formData
+            })
+            .then(response => response.text())
+            .then(data => {
+                if (data === "success") {
+                    alert("User added successfully.");
+                    window.location.href = "Role.jsp";
+                } else {
+                    alert("Error: User could not be added.");
+                }
+            })
+            .catch(error => {
+                alert("Something went wrong. Please try again.");
+            });
+        });
+   
     </script>
 
 </body>

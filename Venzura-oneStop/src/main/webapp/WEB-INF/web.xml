@@ -45,4 +45,14 @@
     <servlet-name>ResetPasswordServlet</servlet-name>
     <url-pattern>/ResetPasswordServlet</url-pattern>
   </servlet-mapping>
+  <servlet>
+    <description></description>
+    <display-name>SaveCategoryItemServlet</display-name>
+    <servlet-name>SaveCategoryItemServlet</servlet-name>
+    <servlet-class>SaveCategoryItemServlet</servlet-class>
+  </servlet>
+  <servlet-mapping>
+    <servlet-name>SaveCategoryItemServlet</servlet-name>
+    <url-pattern>/SaveCategoryItemServlet</url-pattern>
+  </servlet-mapping>
 </web-app>

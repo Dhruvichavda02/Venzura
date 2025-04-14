@@ -1,3 +1,5 @@
+<%@ page import="java.sql.*" %>
+<%@ page import="com.venzura.utils.DBConnection" %>
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -6,25 +8,19 @@
     <title>Venzura Dashboard</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css">
     <link href="https://fonts.googleapis.com/css2?family=Playfair+Display&family=Poppins:wght@300;400&display=swap" rel="stylesheet">
+
     <style>
-        /* General Reset */
         * {
             margin: 0;
             padding: 0;
             box-sizing: border-box;
             font-family: 'Playfair Display', serif;
         }
-.logo{
-font-size: 30px;
-}
         body {
             display: flex;
             min-height: 100vh;
             background-color: #ffffff;
-            height: 1500px;
         }
-
-        /* Sidebar Styling */
         .sidebar {
             width: 207px;
             height: 100vh;
@@ -37,17 +33,14 @@ font-size: 30px;
             transition: width 0.3s ease;
             overflow-x: hidden;
         }
-
         .sidebar.collapsed {
-            width: 60px; /* Collapse sidebar */
+            width: 70px;
         }
-
         .sidebar ul {
             list-style: none;
             padding: 0;
             margin-top: 50px;
         }
-
         .sidebar ul li {
             padding: 15px 20px;
             font-size: 18px;
@@ -58,46 +51,49 @@ font-size: 30px;
             cursor: pointer;
             transition: 0.3s;
             white-space: nowrap;
-            position: relative;
         }
-
+        .sidebar.collapsed ul li {
+            justify-content: center;
+            gap: 0;
+        }
+        .sidebar ul li span {
+            display: inline;
+            transition: opacity 0.3s, width 0.3s;
+        }
+        .sidebar.collapsed ul li span {
+            opacity: 0;
+            width: 0;
+            overflow: hidden;
+        }
         .sidebar ul li:hover {
             background-color: #333;
         }
-
         .sidebar ul li i {
             font-size: 20px;
         }
 
-        /* Hide text when collapsed */
-        .sidebar.collapsed ul li span {
-            display: none;
-        }
-
-        /* Modifications Dropdown */
         .dropdown {
             display: none;
             flex-direction: column;
             background-color: #222;
-            padding-left: 40px;
+            padding-left: 60px;
         }
-
         .dropdown.show {
             display: flex;
         }
-
         .dropdown li {
             padding: 7px 0;
             font-size: 14px;
             color: white;
             cursor: pointer;
         }
-
         .dropdown li:hover {
             background-color: #333;
         }
+        .sidebar.collapsed .dropdown {
+            padding-left: 20px;
+        }
 
-        /* Navbar Styling */
         .navbar {
             width: 100%;
             height: 60px;
@@ -137,16 +133,15 @@ font-size: 30px;
             filter: invert(100%);
         }
 
-        /* Content Area */
         .content {
-            margin-left: 250px;
+            margin-left: 207px;
             padding: 80px 20px;
             transition: margin-left 0.3s ease;
             width: 100%;
         }
 
-        .content.shifted {
-            margin-left: 80px; /* Adjust content margin when sidebar collapses */
+        .sidebar.collapsed ~ .content {
+            margin-left: 70px;
         }
     </style>
 </head>
@@ -161,16 +156,44 @@ font-size: 30px;
         <li onclick="redirectToM()"><i class="fas fa-circle"></i> <span>Music/Host</span></li>
         <li onclick="redirectToPay()"><i class="fas fa-credit-card"></i> <span>Payments</span></li>
         <li onclick="redirectToRole()"><i class="fas fa-user"></i> <span>Roles</span></li>
-         <li onclick="redirectToCategory()"><i class="fas fa-user"></i> <span>Category</span></li>
 
-        <!-- Modifications Dropdown -->
-        <li onclick="toggleModificationsDropdown()">
-            <i class="fas fa-pencil-alt"></i> <span>Modifications</span>
+        <%
+            Connection conn = null;
+            PreparedStatement pstmt = null;
+            ResultSet rs = null;
+
+            try {
+                conn = DBConnection.getConnection();
+                String sql = "SELECT category_id, name FROM categories";
+                pstmt = conn.prepareStatement(sql);
+                rs = pstmt.executeQuery();
+
+                while (rs.next()) {
+        %>
+            <li onclick="redirectToCat('<%= rs.getInt("category_id") %>')">
+                <i class="fas fa-folder"></i> <span><%= rs.getString("name") %></span>
+            </li>
+        <%
+                }
+            } catch (Exception e) {
+                e.printStackTrace();
+            } finally {
+                if (rs != null) try { rs.close(); } catch (SQLException e) { e.printStackTrace(); }
+                if (pstmt != null) try { pstmt.close(); } catch (SQLException e) { e.printStackTrace(); }
+                if (conn != null) try { conn.close(); } catch (SQLException e) { e.printStackTrace(); }
+            }
+        %>
+
+        <!-- Modifications with dropdown -->
+        <li>
+            <div onclick="toggleModificationsDropdown()" style="display: flex; align-items: center; gap: 20px;">
+                <i class="fas fa-pencil-alt"></i> <span>Modifications</span>
+            </div>
+            <ul class='dropdown' id='modificationsDropdown'>
+                <li onclick="redirectToChangeHome()">Home</li>
+                <li onclick="redirectToChangeAbout()">About</li>
+            </ul>
         </li>
-        <ul class='dropdown' id='modificationsDropdown'>
-            <li onclick="redirectToChangeHome()">Home</li>
-            <li onclick="redirectToChangeAbout()">About</li>
-        </ul>
     </ul>
 </div>
 
@@ -183,36 +206,34 @@ font-size: 30px;
     </div>
 </nav>
 
+
+
 <!-- JavaScript -->
 <script>
-function toggleModificationsDropdown() {
-    let dropdown = document.getElementById("modificationsDropdown");
-    dropdown.classList.toggle("show");
-}
+    function redirectToCat(category_id) {
+        window.location.href = "Particular_cat.jsp?category_id=" + encodeURIComponent(category_id);
+    }
 
-function toggleSidebar() {
-    let sidebar = document.getElementById("sidebar");
-    let content = document.querySelector(".content");
+    function toggleModificationsDropdown() {
+        let dropdown = document.getElementById("modificationsDropdown");
+        dropdown.classList.toggle("show");
+    }
 
-    sidebar.classList.toggle("collapsed");
-    content.classList.toggle("shifted");
-}
+    function toggleSidebar() {
+        let sidebar = document.getElementById("sidebar");
+        sidebar.classList.toggle("collapsed");
+    }
 
-// Redirect Functions
-function redirectToVenue() { window.location.href = "Venue.jsp"; }
-function redirectToDec() { window.location.href = "Decorators.jsp"; }
-function redirectToPay() { window.location.href = "Payment.jsp"; }
-function redirectToRole() { window.location.href = "Role.jsp"; }
-function redirectToChangeHome() { window.location.href = "ChangeHome.jsp"; }
-function redirectToChangeAbout() { window.location.href = "ChangeAbout.jsp"; }
-function redirectToM() { window.location.href = "Musician.jsp"; }
-function redirectToAccount() { window.location.href = "Account.jsp"; }
-function redirectToDas() { window.location.href = "Home.jsp"; }
-function redirectToCategory() {window.location.href = "Category.jsp;"}
+    function redirectToVenue() { window.location.href = "Venue.jsp"; }
+    function redirectToDec() { window.location.href = "Decorators.jsp"; }
+    function redirectToPay() { window.location.href = "Payment.jsp"; }
+    function redirectToRole() { window.location.href = "Role.jsp"; }
+    function redirectToChangeHome() { window.location.href = "ChangeHome.jsp"; }
+    function redirectToChangeAbout() { window.location.href = "ChangeAbout.jsp"; }
+    function redirectToM() { window.location.href = "Musician.jsp"; }
+    function redirectToAccount() { window.location.href = "Account.jsp"; }
+    function redirectToDas() { window.location.href = "Home.jsp"; }
 </script>
 
 </body>
 </html>
-
-
-

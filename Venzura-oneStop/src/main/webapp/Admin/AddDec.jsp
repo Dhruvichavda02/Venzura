@@ -1,228 +1,113 @@
+<%@ page import="java.sql.*, java.util.*" %>
+<%@ page import="com.venzura.utils.DBConnection" %>
+<%@ page contentType="text/html; charset=UTF-8" language="java" %>
 <!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Add Category Item</title>
     <style>
-        /* Reset styles */
         body {
             font-family: Arial, sans-serif;
-            margin: 0;
-            padding: 0;
-            display: flex;
+            margin: 20px;
             background-color: #f8f9fa;
         }
-
-        /* Sidebar */
-        .sidebar {
-            width: 250px;
-            height: 100vh;
-            background-color: #343a40;
-            color: white;
-            position: fixed;
-            top: 0;
-            left: 0;
-            transition: 0.3s;
-            padding-top: 60px;
-        }
-
-        /* Sidebar Links */
-        .sidebar a {
-            display: block;
-            padding: 10px 15px;
-            text-decoration: none;
-            color: white;
-        }
-
-        .sidebar a:hover {
-            background-color: #495057;
-        }
-
-        /* Sidebar Hidden */
-        .sidebar.hidden {
-            width: 0;
-            overflow: hidden;
-        }
-
-        /* Content */
-        .content {
-            margin-left: 250px;
-            padding: 20px;
-            width: 100%;
-            transition: margin-left 0.3s;
-        }
-
-        .content.full-width {
-            margin-left: 0;
-        }
-
-        /* Form Container */
-        .form-container {
+        .container {
             max-width: 600px;
             background: white;
             padding: 20px;
             border-radius: 8px;
             box-shadow: 0px 4px 10px rgba(0, 0, 0, 0.1);
             margin: auto;
-            margin-top: 20px;
         }
-
-        /* Form Layout */
-        form {
-            display: flex;
-            flex-direction: column;
-            gap: 15px;
-        }
-
-        /* Form Group */
         .form-group {
-            display: flex;
-            flex-direction: column;
-            padding:10px;
+            margin-bottom: 15px;
         }
-
-        /* Labels */
         label {
             font-weight: bold;
+            display: block;
             margin-bottom: 5px;
         }
-
-        /* Inputs */
         input, textarea {
             width: 100%;
-            padding: 10px;
+            padding: 8px;
             border: 1px solid #ccc;
             border-radius: 5px;
-            background-color: #f9f9f9;
         }
-
-        /* Readonly Styling */
-        input[readonly], textarea[readonly] {
-            color: gray;
-            background-color: #f1f1f1;
-            border: 1px solid #ddd;
-        }
-
-        /* Textarea */
         textarea {
             height: 100px;
             resize: none;
         }
-
-        /* File Upload */
-        .upload-box {
-            display: flex;
-            align-items: center;
-            gap: 10px;
-            background: #f1f1f1;
-            padding: 10px;
-            border-radius: 5px;
-            border: 1px dashed #ccc;
-        }
-
-        .upload-box img {
-            width: 50px;
-            height: 50px;
-            object-fit: cover;
-        }
-
-        small {
-            color: gray;
-        }
-
-        /* Button */
-        .edit-btn {
+        .btn {
             background-color: black;
             color: white;
             padding: 10px;
             border: none;
             border-radius: 5px;
             cursor: pointer;
-            font-size: 16px;
-            text-align: center;
-        }
-
-        /* Responsive Design */
-        @media screen and (max-width: 768px) {
-            .sidebar {
-                width: 0;
-                overflow: hidden;
-            }
-
-            .content {
-                margin-left: 0;
-            }
         }
     </style>
 </head>
 <body>
 
-    <%@ include file="Navbar.jsp" %>
+<%
+    Connection conn = null;
+    PreparedStatement pst = null;
+    ResultSet rs = null;
+    int categoryId = Integer.parseInt(request.getParameter("category_id"));
+    List<Map<String, String>> fields = new ArrayList<>();
 
-    <div class="content" id="content">
-        <div class="form-container">
-            <form>
-                <div class="form-group">
-                    <label> Name:</label>
-                    <input type="text" value="" >
-                </div>
+    try {
+        conn = DBConnection.getConnection();
+        String query = "SELECT field_name, field_type FROM category_fields WHERE category_id = ?";
+        pst = conn.prepareStatement(query);
+        pst.setInt(1, categoryId);
+        rs = pst.executeQuery();
 
-                <div class="form-group">
-                    <label>Email:</label>
-                    <input type="email" value="" >
-                </div>
- <div class="form-group">
-                    <label>Phone:</label>
-                    <input type="number" value="" >
-                </div>
-
-                <div class="form-group">
-                    <label> Location:</label>
-                    <input type="text" value="" >
-                </div>
-
-
-                <div class="form-group">
-                    <label>Amount:</label>
-                    <input type="text" value="" >
-                </div>
-
-                <div class="form-group">
-                    <label>Policy:</label>
-                    <textarea >Amazing Place</textarea>
-                </div>
-  <div class="form-group">
-                    <label>Experience:</label>
-                    <textarea >Amazing Place</textarea>
-                </div>
-                
-                <div class="form-group">
-                    <label>Upload Image:</label>
-                    <div class="upload-box">
-                    
-                        <input type="file">
-                    </div>
-                    <small>Please upload square image, size less than 100KB</small>
-                </div>
-
-                <button type="button" class="edit-btn" onclick = "window.location.href='Decorators.jsp'">Edit</button>
-            </form>
-        </div>
-    </div>
-
-    <script>
-        function toggleSidebar() {
-            let sidebar = document.querySelector('.sidebar');
-            let content = document.getElementById('content');
-            if (sidebar.classList.contains('hidden')) {
-                sidebar.classList.remove('hidden');
-                content.classList.remove('full-width');
-            } else {
-                sidebar.classList.add('hidden');
-                content.classList.add('full-width');
-            }
+        while (rs.next()) {
+            Map<String, String> field = new HashMap<>();
+            field.put("name", rs.getString("field_name"));
+            field.put("type", rs.getString("field_type"));
+            fields.add(field);
         }
-    </script>
+    } catch (Exception e) {
+        e.printStackTrace();
+    } finally {
+        if (rs != null) try { rs.close(); } catch (SQLException e) { e.printStackTrace(); }
+        if (pst != null) try { pst.close(); } catch (SQLException e) { e.printStackTrace(); }
+        if (conn != null) try { conn.close(); } catch (SQLException e) { e.printStackTrace(); }
+    }
+%>
+
+<div class="container">
+    <h2>Add Item to Category <%= categoryId %></h2>
+    <form action="../SaveCategoryItemServlet" method="POST" enctype="multipart/form-data">
+        <input type="hidden" name="category_id" value="<%= categoryId %>">
+        <div class="form-group">
+            <label>Name of Organization:</label>
+            <input type="text" name="item_name" required>
+        </div>
+
+        <% for (Map<String, String> field : fields) { %>
+            <div class="form-group">
+                <label><%= field.get("name") %>:</label>
+                <% if ("textarea".equalsIgnoreCase(field.get("type"))) { %>
+                    <textarea name="<%= field.get("name") %>"></textarea>
+                <% } else { %>
+                    <input type="<%= field.get("type") %>" name="<%= field.get("name") %>">
+                <% } %>
+            </div>
+            
+        <% } %>
+          <div class="form-group">
+            <label>Price:</label>
+            <input type="number" name="price" required>
+        </div>
+
+        <button type="submit" class="btn">Save Item</button>
+    </form>
+</div>
 
 </body>
 </html>

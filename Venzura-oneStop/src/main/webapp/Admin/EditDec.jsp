@@ -1,228 +1,130 @@
+<%@ page import="java.sql.*" %>
+<%@ page import="org.json.JSONObject" %>
+<%@ page import="com.venzura.utils.DBConnection" %>
+<%@ page import="java.util.*" %>
+
+<%
+    Connection conn = null;
+    PreparedStatement pstmt = null;
+    ResultSet rs = null;
+    String itemId = request.getParameter("item_id");
+    JSONObject fieldValues = new JSONObject();
+    Map<String, String> fieldTypes = new HashMap<>();
+    boolean isPost = "POST".equalsIgnoreCase(request.getMethod());
+
+    if (isPost && itemId != null) {
+        JSONObject updatedJson = new JSONObject();
+        Enumeration<String> paramNames = request.getParameterNames();
+        while (paramNames.hasMoreElements()) {
+            String key = paramNames.nextElement();
+            if (!key.equals("submit")) {
+                updatedJson.put(key, request.getParameter(key));
+            }
+        }
+
+        try {
+            conn = DBConnection.getConnection();
+            String updateQuery = "UPDATE category_items SET field_values = ? WHERE item_id = ?";
+            pstmt = conn.prepareStatement(updateQuery);
+            pstmt.setString(1, updatedJson.toString());
+            pstmt.setInt(2, Integer.parseInt(itemId));
+            pstmt.executeUpdate();
+            fieldValues = updatedJson;
+        } catch (Exception e) {
+            e.printStackTrace();
+        } finally {
+            try { if (pstmt != null) pstmt.close(); } catch (SQLException ignore) {}
+            try { if (conn != null) conn.close(); } catch (SQLException ignore) {}
+        }
+    } else if (itemId != null) {
+        try {
+            conn = DBConnection.getConnection();
+
+            // Step 1: Get field_values + category_id
+            String itemQuery = "SELECT category_id, field_values FROM category_items WHERE item_id = ?";
+            pstmt = conn.prepareStatement(itemQuery);
+            pstmt.setInt(1, Integer.parseInt(itemId));
+            rs = pstmt.executeQuery();
+
+            int categoryId = 0;
+            if (rs.next()) {
+                fieldValues = new JSONObject(rs.getString("field_values"));
+                categoryId = rs.getInt("category_id");
+            }
+            rs.close();
+            pstmt.close();
+
+            // Step 2: Get field types for that category
+            String fieldTypeQuery = "SELECT field_name, field_type FROM category_fields WHERE category_id = ?";
+            pstmt = conn.prepareStatement(fieldTypeQuery);
+            pstmt.setInt(1, categoryId);
+            rs = pstmt.executeQuery();
+
+            while (rs.next()) {
+                fieldTypes.put(rs.getString("field_name"), rs.getString("field_type"));
+            }
+
+        } catch (Exception e) {
+            e.printStackTrace();
+        } finally {
+            try { if (rs != null) rs.close(); } catch (SQLException ignore) {}
+            try { if (pstmt != null) pstmt.close(); } catch (SQLException ignore) {}
+            try { if (conn != null) conn.close(); } catch (SQLException ignore) {}
+        }
+    }
+%>
+
 <!DOCTYPE html>
-<html lang="en">
+<html>
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Edit Fields</title>
     <style>
-        /* Reset styles */
-        body {
-            font-family: Arial, sans-serif;
-            margin: 0;
-            padding: 0;
-            display: flex;
-            background-color: #f8f9fa;
-        }
-
-        /* Sidebar */
-        .sidebar {
-            width: 250px;
-            height: 100vh;
-            background-color: #343a40;
-            color: white;
-            position: fixed;
-            top: 0;
-            left: 0;
-            transition: 0.3s;
-            padding-top: 60px;
-        }
-
-        /* Sidebar Links */
-        .sidebar a {
-            display: block;
-            padding: 10px 15px;
-            text-decoration: none;
-            color: white;
-        }
-
-        .sidebar a:hover {
-            background-color: #495057;
-        }
-
-        /* Sidebar Hidden */
-        .sidebar.hidden {
-            width: 0;
-            overflow: hidden;
-        }
-
-        /* Content */
-        .content {
-            margin-left: 250px;
-            padding: 20px;
-            width: 100%;
-            transition: margin-left 0.3s;
-        }
-
-        .content.full-width {
-            margin-left: 0;
-        }
-
-        /* Form Container */
-        .form-container {
-            max-width: 600px;
-            background: white;
-            padding: 20px;
-            border-radius: 8px;
-            box-shadow: 0px 4px 10px rgba(0, 0, 0, 0.1);
-            margin: auto;
-            margin-top: 20px;
-        }
-
-        /* Form Layout */
-        form {
-            display: flex;
-            flex-direction: column;
-            gap: 15px;
-        }
-
-        /* Form Group */
-        .form-group {
-            display: flex;
-            flex-direction: column;
-            padding:10px;
-        }
-
-        /* Labels */
-        label {
-            font-weight: bold;
-            margin-bottom: 5px;
-        }
-
-        /* Inputs */
-        input, textarea {
-            width: 100%;
-            padding: 10px;
-            border: 1px solid #ccc;
-            border-radius: 5px;
-            background-color: #f9f9f9;
-        }
-
-        /* Readonly Styling */
-        input[readonly], textarea[readonly] {
-            color: gray;
-            background-color: #f1f1f1;
-            border: 1px solid #ddd;
-        }
-
-        /* Textarea */
-        textarea {
-            height: 100px;
-            resize: none;
-        }
-
-        /* File Upload */
-        .upload-box {
-            display: flex;
-            align-items: center;
-            gap: 10px;
-            background: #f1f1f1;
-            padding: 10px;
-            border-radius: 5px;
-            border: 1px dashed #ccc;
-        }
-
-        .upload-box img {
-            width: 50px;
-            height: 50px;
-            object-fit: cover;
-        }
-
-        small {
-            color: gray;
-        }
-
-        /* Button */
-        .edit-btn {
-            background-color: black;
-            color: white;
-            padding: 10px;
-            border: none;
-            border-radius: 5px;
-            cursor: pointer;
-            font-size: 16px;
-            text-align: center;
-        }
-
-        /* Responsive Design */
-        @media screen and (max-width: 768px) {
-            .sidebar {
-                width: 0;
-                overflow: hidden;
-            }
-
-            .content {
-                margin-left: 0;
-            }
-        }
+        body { font-family: Arial; background-color: #f4f4f4; padding: 30px; }
+        .form-container { background: white; max-width: 600px; margin: auto; padding: 20px; border-radius: 8px; }
+        .form-group { margin-bottom: 15px; }
+        label { font-weight: bold; display: block; margin-bottom: 5px; }
+        input, textarea { width: 100%; padding: 8px; border: 1px solid #ccc; border-radius: 4px; }
+        textarea { resize: none; height: 100px; }
+        button { background: black; color: white; padding: 10px 20px; border: none; border-radius: 4px; cursor: pointer; }
+        img { max-width: 100%; height: auto; margin-bottom: 10px; border: 1px solid #ccc; border-radius: 5px; }
     </style>
 </head>
 <body>
 
-    <%@ include file="Navbar.jsp" %>
+<div class="form-container">
+    <h2>Edit Fields</h2>
+   <form method="post" enctype="multipart/form-data">
 
-    <div class="content" id="content">
-        <div class="form-container">
-            <form>
-                <div class="form-group">
-                    <label> Name:</label>
-                    <input type="text" value="Silver Sand" >
-                </div>
+        <%
+            Iterator<String> keys = fieldValues.keys();
+            while (keys.hasNext()) {
+                String key = keys.next();
 
-                <div class="form-group">
-                    <label>Email:</label>
-                    <input type="email" value="Silver@gmail.com" >
-                </div>
- <div class="form-group">
-                    <label>Phone:</label>
-                    <input type="number" value="1234567890" >
-                </div>
+                if (key.equalsIgnoreCase("category_id") || key.equalsIgnoreCase("item_id")) {
+                    continue;
+                }
 
-                <div class="form-group">
-                    <label> Location:</label>
-                    <input type="text" value="Rajkot" >
-                </div>
+                String value = fieldValues.optString(key);
+                String fieldType = fieldTypes.getOrDefault(key, "");
 
+        %>
+        <div class="form-group">
+            <label><%= key %>:</label>
 
-                <div class="form-group">
-                    <label>Amount:</label>
-                    <input type="text" value="5K per day" >
-                </div>
-
-                <div class="form-group">
-                    <label>Policy:</label>
-                    <textarea >Amazing Place</textarea>
-                </div>
-  <div class="form-group">
-                    <label>Experience:</label>
-                    <textarea >Amazing Place</textarea>
-                </div>
-                
-                <div class="form-group">
-                    <label>Upload Image:</label>
-                    <div class="upload-box">
-                    
-                        <input type="file">
-                    </div>
-                    <small>Please upload square image, size less than 100KB</small>
-                </div>
-
-                <button type="button" class="edit-btn" onclick = "window.location.href='Decorators.jsp'">Edit</button>
-            </form>
+            <% if ("file".equalsIgnoreCase(fieldType)) { %>
+                <img src="<%= value %>" alt="Image for <%= key %>">
+                <input type="text" name="<%= key %>" value="<%= value %>">
+            <% } else if (key.equalsIgnoreCase("policy") || key.equalsIgnoreCase("experience")) { %>
+                <textarea name="<%= key %>"><%= value %></textarea>
+            <% } else { %>
+                <input type="text" name="<%= key %>" value="<%= value %>">
+            <% } %>
         </div>
-    </div>
+        <% } %>
 
-    <script>
-        function toggleSidebar() {
-            let sidebar = document.querySelector('.sidebar');
-            let content = document.getElementById('content');
-            if (sidebar.classList.contains('hidden')) {
-                sidebar.classList.remove('hidden');
-                content.classList.remove('full-width');
-            } else {
-                sidebar.classList.add('hidden');
-                content.classList.add('full-width');
-            }
-        }
-    </script>
+        <button type="submit" name="submit">Update</button>
+    </form>
+</div>
 
 </body>
 </html>

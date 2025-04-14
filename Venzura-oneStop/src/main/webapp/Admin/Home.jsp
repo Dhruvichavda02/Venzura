@@ -1,3 +1,43 @@
+<%@ page import="java.sql.*" %>
+<%@ page import="com.venzura.utils.DBConnection" %>
+
+
+<%
+    int adminCount = 0;
+    try {
+        Connection conn = DBConnection.getConnection(); // Assuming your class provides this method
+        PreparedStatement pst = conn.prepareStatement( "SELECT COUNT(*) FROM users WHERE role = 'admin' ");
+        ResultSet rs = pst.executeQuery();
+        
+        if (rs.next()) {
+            adminCount = rs.getInt(1);
+        }
+
+        rs.close();
+        pst.close();
+        conn.close();
+    } catch (Exception e) {
+        e.printStackTrace();
+    }
+%>
+<%
+    int userCount = 0;
+    try {
+        Connection conn = DBConnection.getConnection(); // Assuming your class provides this method
+        PreparedStatement pst = conn.prepareStatement( "SELECT COUNT(*) FROM users WHERE role = 'user' ");
+        ResultSet rs = pst.executeQuery();
+        
+        if (rs.next()) {
+        	userCount = rs.getInt(1);
+        }
+
+        rs.close();
+        pst.close();
+        conn.close();
+    } catch (Exception e) {
+        e.printStackTrace();
+    }
+%>
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -25,8 +65,10 @@ html, body {
 
 h1 {
     font-size: 32px;
-    margin-bottom: 37px;
+   margin: 211px 0 -12px;
+
     text-align: center;
+   
 }
 
 .dashboard {
@@ -35,6 +77,8 @@ h1 {
     gap: 110px; /* Space between cards */
     max-width: 800px; /* Adjusted width to prevent excessive stretching */
     padding: 20px;
+    margin: 23px 0 37px;
+
 }
 
 .card {
@@ -103,12 +147,12 @@ h1 {
     <div class="dashboard">
         <div class="card" onclick="window.location.href='Role.jsp'" style="cursor: pointer;">
     <i class="fas fa-user-tie"></i>
-    <span>2</span>
+    <span><%= adminCount %></span>
     <p>Admin</p>
 </div>
         <div class="card">
             <i class="fas fa-user" onclick="window.location.href='Role.jsp'" style="cursor: pointer;"></i>
-            <span>222</span>
+            <span><%= userCount %></span>
             <p>Users</p>
         </div>
         <div class="card">
