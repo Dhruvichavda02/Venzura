@@ -6,7 +6,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Add Category Item</title>
+  
     <style>
         body {
             font-family: Arial, sans-serif;
@@ -100,10 +100,7 @@
             </div>
             
         <% } %>
-          <div class="form-group">
-            <label>Price:</label>
-            <input type="number" name="price" required>
-        </div>
+        
 
         <button type="submit" class="btn">Save Item</button>
     </form>

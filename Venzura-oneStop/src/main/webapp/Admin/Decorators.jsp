@@ -1,3 +1,5 @@
+<%@ page import="java.sql.*, java.util.*" %>
+<%@ page contentType="text/html; charset=UTF-8" %>
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -14,15 +16,15 @@
             display: flex;
         }
 
-      .add-role-btn {
-    background-color: black;
-    color: white;
-    border: none;
-    padding: 10px 20px;
-    font-size: 16px;
-    cursor: pointer;
-    border-radius: 5px;
-}
+        .add-role-btn {
+            background-color: black;
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            font-size: 16px;
+            cursor: pointer;
+            border-radius: 5px;
+        }
 
         /* Sidebar */
         .sidebar {
@@ -139,100 +141,112 @@
 </head>
 <body>
 
-    <%@ include file="Navbar.jsp" %>
+<%@ include file="Navbar.jsp" %>
 
-    <div class="content" id="content">
-    <button class="btn add-role-btn" onclick="window.location.href='AddDec.jsp'">Add Decorator</button>
-        <div class="table-container">
-            <table>
-                <thead>
+<div class="content" id="content">
+    <button class="btn add-role-btn" onclick="window.location.href='AddDecorators.jsp'">Add Decorator</button>
+    <div class="table-container">
+        <table>
+            <thead>
+                <tr>
+                    <th>#</th>
+                    <th>Name</th>
+                    <th>Location</th>
+                    <th>Price</th>
+                    <th>Phone</th>
+                    <th>Edit</th>
+                    <th>Delete</th>
+                </tr>
+            </thead>
+            <tbody>
+                <% 
+                    // Fetching data from the database and displaying it dynamically
+                    Connection conn = null;
+                    PreparedStatement stmt = null;
+                    ResultSet rs = null;
+
+                    try {
+                        conn = DBConnection.getConnection();
+                        String query = "SELECT * FROM decorations"; // Your table name here
+                        stmt = conn.prepareStatement(query);
+                        rs = stmt.executeQuery();
+
+                        int count = 1;
+                        while (rs.next()) {
+                            String name = rs.getString("name");
+                            String location = rs.getString("location");
+                            String price = rs.getString("price");
+                            String phone = rs.getString("phone");
+                            int id = rs.getInt("id");  // Assuming 'id' is the primary key
+                %>
                     <tr>
-                        <th>#</th>
-                        <th>Name</th>
-                        <th>Location</th>
-                      
-                        <th>Price</th>
-                        <th>Phone</th>
-                        <th>Edit</th>
-                        <th>Delete</th>
+                        <td data-label="#"> <%= count++ %> </td>
+                        <td data-label="Name"><strong><%= name %></strong><br></td>
+                        <td data-label="Location"><%= location %></td>
+                        <td data-label="Price"><%= price %></td>
+                        <td data-label="Phone"><%= phone %></td>
+                        <td data-label="Edit"><button class="edit-btn" onclick="window.location.href='EditDecorators.jsp?id=<%= id %>'">Edit</button></td>
+                        <td data-label="Delete">
+                            <!-- Form for Delete button -->
+                            <form action="Decorators.jsp" method="POST" onsubmit="return confirm('Are you sure you want to delete this decorator?')">
+                                <input type="hidden" name="deleteId" value="<%= id %>" />
+                                <button type="submit" class="del-btn">Delete</button>
+                            </form>
+                        </td>
                     </tr>
-                </thead>
-                <tbody>
-                    <tr>
-                        <td data-label="#">1</td>
-                        <td data-label="Name"><strong>Ann Culhane</strong><br></td>
-                        <td data-label="Location">Lorem ipsum dolor sit amet...</td>
-                        
-                        <td data-label="Price">10k</td>
-                        <td data-label="Policy">5684236526</td>
-                        <td data-label="Edit"><button class="edit-btn" onclick = "window.location.href='EditDec.jsp'">Edit</button></td>
-                        <td data-label="Delete"><button class="del-btn" onclick="confirmDelete(this)">Del</button></td>
-
-                    </tr>
-                     <tr>
-                        <td data-label="#">2</td>
-                        <td data-label="Name"><strong>Monica Geller</strong><br></td>
-                        <td data-label="Location">Lorem ipsum dolor sit amet...</td>
-                        
-                        <td data-label="Price">10k</td>
-                        <td data-label="Policy">5684236526</td>
-                        <td data-label="Edit"><button class="edit-btn" onclick = "window.location.href='EditDec.jsp'">Edit</button></td>
-                        <td data-label="Delete"><button class="del-btn" onclick="confirmDelete(this)">Del</button></td>
-
-                    </tr>
-                    
-                     <tr>
-                        <td data-label="#">4</td>
-                        <td data-label="Name"><strong>Ross Geller</strong><br></td>
-                        <td data-label="Location">Lorem ipsum dolor sit amet...</td>
-                        
-                        <td data-label="Price">10k</td>
-                        <td data-label="Policy">5684236526</td>
-                        <td data-label="Edit"><button class="edit-btn" onclick = "window.location.href='EditVenue.jsp'">Edit</button></td>
-                        <td data-label="Delete"><button class="del-btn" onclick="confirmDelete(this)">Del</button></td>
-
-                    </tr>
-                      <tr>
-                        <td data-label="#">5</td>
-                        <td data-label="Name"><strong>Rachel Green</strong><br></td>
-                        <td data-label="Location">Lorem ipsum dolor sit amet...</td>
-                        
-                        <td data-label="Price">10k</td>
-                        <td data-label="Policy">5684236526</td>
-                        <td data-label="Edit"><button class="edit-btn" onclick = "window.location.href='EditVenue.jsp'">Edit</button></td>
-                        <td data-label="Delete"><button class="del-btn" onclick="confirmDelete(this)">Del</button></td>
-
-                    </tr>
-                    
-                </tbody>
-            </table>
-        </div>
+                <% 
+                        }
+                    } catch (SQLException e) {
+                        e.printStackTrace();
+                    } finally {
+                        try {
+                            if (rs != null) rs.close();
+                            if (stmt != null) stmt.close();
+                            if (conn != null) conn.close();
+                        } catch (SQLException e) {
+                            e.printStackTrace();
+                        }
+                    }
+                %>
+            </tbody>
+        </table>
     </div>
+</div>
 
-    <script>
-        function toggleSidebar() {
-            let sidebar = document.querySelector('.sidebar');
-            let content = document.getElementById('content');
-            if (sidebar.classList.contains('hidden')) {
-                sidebar.classList.remove('hidden');
-                content.classList.remove('full-width');
-            } else {
-                sidebar.classList.add('hidden');
-                content.classList.add('full-width');
-            }
-        }
+<% 
+    // Deletion logic: Check if the deleteId parameter is available (from the form submission)
+    String deleteId = request.getParameter("deleteId");
+    if (deleteId != null && !deleteId.isEmpty()) {
+       
         
-    
-        function confirmDelete(button) {
-            if (confirm("Are you sure you want to delete this entry?")) {
-                alert("Deleted");
-                let row = button.closest("tr");
-                row.remove(); // Remove the row from the table
+        try {
+            conn = DBConnection.getConnection();
+            String deleteQuery = "DELETE FROM decorations WHERE id = ?";
+            stmt = conn.prepareStatement(deleteQuery);
+            stmt.setInt(1, Integer.parseInt(deleteId));
+
+            // Execute the delete operation
+            int rowsAffected = stmt.executeUpdate();
+            
+            if (rowsAffected > 0) {
+                out.println("<script>alert('Record deleted successfully');</script>");
+                response.sendRedirect("Decorators.jsp");  // Redirect to the same page after deletion
+            } else {
+                out.println("<script>alert('Error deleting record.');</script>");
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+            out.println("Error: " + e.getMessage());
+        } finally {
+            try {
+                if (stmt != null) stmt.close();
+                if (conn != null) conn.close();
+            } catch (SQLException e) {
+                e.printStackTrace();
             }
         }
-
-
-    </script>
+    }
+%>
 
 </body>
 </html>

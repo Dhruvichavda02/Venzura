@@ -1,10 +1,11 @@
 <%@ page language="java" contentType="text/html; charset=UTF-8" pageEncoding="UTF-8"%>
+<%@ page import="java.sql.*, com.venzura.utils.DBConnection" %>
 <!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Add Music Host</title>
+    <title>Edit Music Host</title>
     <style>
         body {
             font-family: Arial, sans-serif;
@@ -72,78 +73,144 @@
             font-size: 12px;
             margin-top: 5px;
         }
+        .image-container {
+            position: relative;
+            display: inline-block;
+        }
+        .remove-image {
+            position: absolute;
+            top: -10px;
+            right: -10px;
+            background: red;
+            color: white;
+            border: none;
+            border-radius: 50%;
+            width: 20px;
+            height: 20px;
+            font-weight: bold;
+            cursor: pointer;
+        }
     </style>
 </head>
 <body>
     <div class="form-container">
-        <h1>Add New Music Host</h1>
-        <form action="../AddMusicHostServlet" method="post" enctype="multipart/form-data" onsubmit="return validateForm()">
+        <h1>Edit Music Host</h1>
+        <%
+            Connection conn = null;
+            PreparedStatement pstmt = null;
+            ResultSet rs = null;
+            String musicHostId = request.getParameter("id");
+            
+            try {
+                conn = DBConnection.getConnection();
+                String sql = "SELECT * FROM music_hosts WHERE id = ?";
+                pstmt = conn.prepareStatement(sql);
+                pstmt.setString(1, musicHostId);
+                rs = pstmt.executeQuery();
+                
+                if (rs.next()) {
+        %>
+        <form action="../UpdateMusicHostServlet" method="post" enctype="multipart/form-data" onsubmit="return validateForm()">
+            <input type="hidden" name="id" value="<%= rs.getInt("id") %>">
+            
             <div class="form-group">
                 <label for="name">Name:</label>
-                <input type="text" id="name" name="name" required>
+                <input type="text" id="name" name="name" value="<%= rs.getString("name") %>" required>
                 <div id="nameError" class="error"></div>
             </div>
 
             <div class="form-group">
                 <label for="type">Type:</label>
                 <select id="type" name="type" required>
-                    <option value="">Select Type</option>
-                    <option value="DJ">DJ</option>
-                    <option value="Band">Band</option>
-                    <option value="Solo Artist">Solo Artist</option>
-                    <option value="Orchestra">Orchestra</option>
+                    <option value="DJ" <%= "DJ".equals(rs.getString("type")) ? "selected" : "" %>>DJ</option>
+                    <option value="Band" <%= "Band".equals(rs.getString("type")) ? "selected" : "" %>>Band</option>
+                    <option value="Solo Artist" <%= "Solo Artist".equals(rs.getString("type")) ? "selected" : "" %>>Solo Artist</option>
+                    <option value="Orchestra" <%= "Orchestra".equals(rs.getString("type")) ? "selected" : "" %>>Orchestra</option>
                 </select>
                 <div id="typeError" class="error"></div>
             </div>
 
             <div class="form-group">
                 <label for="price">Price:</label>
-                <input type="number" id="price" name="price" min="100" step="0.01" required>
+                <input type="number" id="price" name="price" min="100" step="0.01" 
+                       value="<%= rs.getDouble("price") %>" required>
                 <div id="priceError" class="error"></div>
             </div>
 
             <div class="form-group">
                 <label for="experience_years">Experience (Years):</label>
-                <input type="number" id="experience_years" name="experience_years" min="0" required>
+                <input type="number" id="experience_years" name="experience_years" min="0" 
+                       value="<%= rs.getInt("experience_years") %>" required>
                 <div id="experienceError" class="error"></div>
             </div>
 
             <div class="form-group">
                 <label for="genres">Genres (comma separated):</label>
-                <input type="text" id="genres" name="genres" required>
+                <input type="text" id="genres" name="genres" value="<%= rs.getString("genres") %>" required>
                 <div id="genresError" class="error"></div>
             </div>
 
             <div class="form-group">
                 <label for="contact_phone">Contact Phone:</label>
-                <input type="tel" id="contact_phone" name="contact_phone" pattern="[0-9]{10,15}" required>
+                <input type="tel" id="contact_phone" name="contact_phone" pattern="[0-9]{10,15}" 
+                       value="<%= rs.getString("contact_phone") %>" required>
                 <div id="phoneError" class="error"></div>
             </div>
 
             <div class="form-group">
                 <label for="location">Location:</label>
-                <input type="text" id="location" name="location" required>
+                <input type="text" id="location" name="location" value="<%= rs.getString("location") %>" required>
                 <div id="locationError" class="error"></div>
             </div>
 
             <div class="form-group">
                 <label for="description">Description:</label>
-                <textarea id="description" name="description" required minlength="20" maxlength="1000"></textarea>
+                <textarea id="description" name="description" required 
+                          minlength="20" maxlength="1000"><%= rs.getString("description") %></textarea>
                 <div id="descriptionError" class="error"></div>
             </div>
 
             <div class="form-group">
-                <label>Upload Image:</label>
+                <label>Current Image:</label>
+                <div class="upload-box">
+                    <% if (rs.getString("image_paths") != null && !rs.getString("image_paths").isEmpty()) { %>
+                        <div class="image-container">
+                            <img src="../<%= rs.getString("image_paths") %>" alt="Current Image" style="max-width: 200px;">
+                            <button type="button" class="remove-image" onclick="markImageForRemoval(this)">×</button>
+                        </div>
+                        <input type="hidden" id="currentImage" name="currentImage" value="<%= rs.getString("image_paths") %>">
+                        <input type="hidden" id="removeImage" name="removeImage" value="false">
+                    <% } else { %>
+                        <p>No image currently set</p>
+                    <% } %>
+                </div>
+            </div>
+
+            <div class="form-group">
+                <label>Update Image:</label>
                 <div class="upload-box">
                     <input type="file" id="image" name="image" accept="image/*" onchange="previewImage(this)">
                     <img id="imagePreview" src="" alt="Image Preview" style="display: none;">
-                    <small>Please upload square image, size less than 2MB</small>
+                    <small>Upload new image (JPEG/PNG), max 2MB. Leave blank to keep current image.</small>
                     <div id="imageError" class="error"></div>
                 </div>
             </div>
 
-            <button type="submit" class="submit-btn">Add Music Host</button>
+            <button type="submit" class="submit-btn">Update Music Host</button>
         </form>
+        <%
+                } else {
+                    out.println("<p>Music host not found</p>");
+                }
+            } catch (Exception e) {
+                e.printStackTrace();
+                out.println("<p>Error retrieving music host data: " + e.getMessage() + "</p>");
+            } finally {
+                try { if (rs != null) rs.close(); } catch (SQLException e) { e.printStackTrace(); }
+                try { if (pstmt != null) pstmt.close(); } catch (SQLException e) { e.printStackTrace(); }
+                try { if (conn != null) conn.close(); } catch (SQLException e) { e.printStackTrace(); }
+            }
+        %>
     </div>
 
     <script>
@@ -177,6 +244,14 @@
                     errorDiv.textContent = '';
                 }
                 reader.readAsDataURL(file);
+            }
+        }
+
+        function markImageForRemoval(button) {
+            if (confirm('Remove current image?')) {
+                const container = button.parentElement;
+                container.style.display = 'none';
+                document.getElementById('removeImage').value = 'true';
             }
         }
 

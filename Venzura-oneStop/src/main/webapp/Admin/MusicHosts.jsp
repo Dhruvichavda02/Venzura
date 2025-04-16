@@ -4,7 +4,12 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
- <style>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Music Hosts</title>
+    <style>
+        /* Use similar styles as your Venue.jsp */
+      <style>
         /* Global Styles */
         body {
             font-family: Arial, sans-serif;
@@ -89,7 +94,7 @@
             background-color: #f9f9f9;
         }
         .add-btn{
-         border: none;
+          border: none;
             padding: 8px 16px;
             cursor: pointer;
             border-radius: 5px;
@@ -97,6 +102,7 @@
             color: white;
              background-color: black;
         }
+        
 
         .edit-btn, .del-btn {
             border: none;
@@ -145,87 +151,81 @@
             }
         }
     </style>
+    </style>
 </head>
 <body>
     <%@ include file="Navbar.jsp" %>
 
     <div class="content" id="content">
-        <!-- Add Venue Button -->
-        <div style="margin-bottom: 20px;">
-            <button class="add-btn" onclick="window.location.href='AddVenue.jsp'">Add Venue</button>
-        </div>
-
+        <button class="add-btn" onclick="window.location.href='AddMusic.jsp'">Add Music Host</button>
+        
         <div class="table-container">
             <table>
                 <thead>
                     <tr>
                         <th>#</th>
                         <th>Name</th>
-                        <th>Location</th>
-                        <th>Capacity</th>
+                        <th>Type</th>
                         <th>Price</th>
-                        <th>Amenities</th>
+                        <th>Experience</th>
+                        <th>Genres</th>
                         <th>Contact</th>
-                        <th>Description</th>
+                        <th>Location</th>
                         <th>Edit</th>
-                        <th>Delete</th>
+                         <th>Delete</th>
                     </tr>
                 </thead>
-                <tbody id="venuesTableBody">
+                <tbody>
                     <%
                         Connection conn = null;
                         Statement stmt = null;
                         ResultSet rs = null;
 
-                        // Handle delete request if deleteId parameter exists
+                        // Handle delete if deleteId parameter exists
                         String deleteId = request.getParameter("deleteId");
-                        if (deleteId != null && !deleteId.isEmpty()) {
+                        if (deleteId != null) {
                             Connection deleteConn = null;
                             PreparedStatement deleteStmt = null;
                             try {
                                 deleteConn = DBConnection.getConnection();
-                                String deleteQuery = "DELETE FROM venues WHERE id = ?";
+                                String deleteQuery = "DELETE FROM music_hosts WHERE id = ?";
                                 deleteStmt = deleteConn.prepareStatement(deleteQuery);
                                 deleteStmt.setInt(1, Integer.parseInt(deleteId));
-                                int rowsAffected = deleteStmt.executeUpdate();
-                                
-                                if (rowsAffected > 0) {
-                                    out.println("<script>alert('Venue deleted successfully');</script>");
-                                } else {
-                                    out.println("<script>alert('Venue not found or could not be deleted');</script>");
-                                }
+                                deleteStmt.executeUpdate();
                             } catch (Exception e) {
-                                out.println("<script>alert('Error deleting venue: " + e.getMessage() + "');</script>");
+                                e.printStackTrace();
                             } finally {
-                                try { if (deleteStmt != null) deleteStmt.close(); } catch (SQLException e) { e.printStackTrace(); }
-                                try { if (deleteConn != null) deleteConn.close(); } catch (SQLException e) { e.printStackTrace(); }
+                                try { if (deleteStmt != null) deleteStmt.close(); } catch (Exception e) {}
+                                try { if (deleteConn != null) deleteConn.close(); } catch (Exception e) {}
                             }
                         }
 
-                        // Fetch and display venues
                         try {
                             conn = DBConnection.getConnection();
                             stmt = conn.createStatement();
-                            String query = "SELECT id, name, location, capacity, price, amenities, contact_phone, description FROM venues";
+                            String query = "SELECT * FROM music_hosts";
                             rs = stmt.executeQuery(query);
 
                             int index = 1;
                             while (rs.next()) {
                     %>
-                                <tr id="venue_<%= rs.getInt("id") %>">
+                                <tr>
                                     <td><%= index++ %></td>
                                     <td><strong><%= rs.getString("name") %></strong></td>
-                                    <td><%= rs.getString("location") %></td>
-                                    <td><%= rs.getInt("capacity") %></td>
+                                    <td><%= rs.getString("type") %></td>
                                     <td><%= rs.getDouble("price") %></td>
-                                    <td><%= rs.getString("amenities") %></td>
+                                    <td><%= rs.getInt("experience_years") %> years</td>
+                                    <td><%= rs.getString("genres") %></td>
                                     <td><%= rs.getString("contact_phone") %></td>
-                                    <td><%= rs.getString("description") %></td>
-                                    <td><button class="edit-btn" onclick="window.location.href='EditVenue.jsp?id=<%= rs.getInt("id") %>'">Edit</button></td>
+                                    <td><%= rs.getString("location") %></td>
                                     <td>
-                                        <form method="post" action="Venue.jsp" style="display:inline;">
+                                        <button class="edit-btn" onclick="window.location.href='EditMusicHost.jsp?id=<%= rs.getInt("id") %>'">Edit</button>
+                                        
+                                    </td>
+                                    <td>
+                                    <form method="post" action="MusicHosts.jsp" style="display:inline;">
                                             <input type="hidden" name="deleteId" value="<%= rs.getInt("id") %>">
-                                            <button type="submit" class="del-btn" onclick="return confirm('Are you sure you want to delete this venue?')">Delete</button>
+                                            <button type="submit" class="del-btn" onclick="return confirm('Are you sure?')">Delete</button>
                                         </form>
                                     </td>
                                 </tr>
@@ -247,13 +247,5 @@
             </table>
         </div>
     </div>
-
-    <script>
-        // This will refresh the page after deletion to show updated list
-        if (window.location.search.includes('deleteId')) {
-            // Remove the deleteId parameter from URL after processing
-            window.history.replaceState({}, document.title, window.location.pathname);
-        }
-    </script>
 </body>
 </html>

@@ -157,32 +157,9 @@
         <li onclick="redirectToPay()"><i class="fas fa-credit-card"></i> <span>Payments</span></li>
         <li onclick="redirectToRole()"><i class="fas fa-user"></i> <span>Roles</span></li>
 
-        <%
-            Connection conn = null;
-            PreparedStatement pstmt = null;
-            ResultSet rs = null;
+        
+            
 
-            try {
-                conn = DBConnection.getConnection();
-                String sql = "SELECT category_id, name FROM categories";
-                pstmt = conn.prepareStatement(sql);
-                rs = pstmt.executeQuery();
-
-                while (rs.next()) {
-        %>
-            <li onclick="redirectToCat('<%= rs.getInt("category_id") %>')">
-                <i class="fas fa-folder"></i> <span><%= rs.getString("name") %></span>
-            </li>
-        <%
-                }
-            } catch (Exception e) {
-                e.printStackTrace();
-            } finally {
-                if (rs != null) try { rs.close(); } catch (SQLException e) { e.printStackTrace(); }
-                if (pstmt != null) try { pstmt.close(); } catch (SQLException e) { e.printStackTrace(); }
-                if (conn != null) try { conn.close(); } catch (SQLException e) { e.printStackTrace(); }
-            }
-        %>
 
         <!-- Modifications with dropdown -->
         <li>
@@ -230,7 +207,7 @@
     function redirectToRole() { window.location.href = "Role.jsp"; }
     function redirectToChangeHome() { window.location.href = "ChangeHome.jsp"; }
     function redirectToChangeAbout() { window.location.href = "ChangeAbout.jsp"; }
-    function redirectToM() { window.location.href = "Musician.jsp"; }
+    function redirectToM() { window.location.href = "MusicHosts.jsp"; }
     function redirectToAccount() { window.location.href = "Account.jsp"; }
     function redirectToDas() { window.location.href = "Home.jsp"; }
 </script>
