@@ -156,21 +156,14 @@
         <li onclick="redirectToM()"><i class="fas fa-circle"></i> <span>Music/Host</span></li>
         <li onclick="redirectToPay()"><i class="fas fa-credit-card"></i> <span>Payments</span></li>
         <li onclick="redirectToRole()"><i class="fas fa-user"></i> <span>Roles</span></li>
+        <li onclick="redirectToBook()"><i class="fas fa-book"></i> <span>Booking</span></li>
 
         
             
 
 
         <!-- Modifications with dropdown -->
-        <li>
-            <div onclick="toggleModificationsDropdown()" style="display: flex; align-items: center; gap: 20px;">
-                <i class="fas fa-pencil-alt"></i> <span>Modifications</span>
-            </div>
-            <ul class='dropdown' id='modificationsDropdown'>
-                <li onclick="redirectToChangeHome()">Home</li>
-                <li onclick="redirectToChangeAbout()">About</li>
-            </ul>
-        </li>
+       
     </ul>
 </div>
 
@@ -210,6 +203,7 @@
     function redirectToM() { window.location.href = "MusicHosts.jsp"; }
     function redirectToAccount() { window.location.href = "Account.jsp"; }
     function redirectToDas() { window.location.href = "Home.jsp"; }
+    function redirectToBook() { window.location.href = "Booked.jsp"; }
 </script>
 
 </body>

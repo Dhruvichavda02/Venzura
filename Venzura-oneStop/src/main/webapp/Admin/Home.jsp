@@ -38,6 +38,78 @@
         e.printStackTrace();
     }
 %>
+<%
+    int MusicCount = 0;
+    try {
+        Connection conn = DBConnection.getConnection(); // Assuming your class provides this method
+        PreparedStatement pst = conn.prepareStatement( "SELECT COUNT(music_host_id) FROM vbookings  ");
+        ResultSet rs = pst.executeQuery();
+        
+        if (rs.next()) {
+        	MusicCount = rs.getInt(1);
+        }
+
+        rs.close();
+        pst.close();
+        conn.close();
+    } catch (Exception e) {
+        e.printStackTrace();
+    }
+%>
+<%
+    int BookedVenue = 0;
+    try {
+        Connection conn = DBConnection.getConnection(); // Assuming your class provides this method
+        PreparedStatement pst = conn.prepareStatement( "SELECT COUNT(venue_id) FROM vbookings  ");
+        ResultSet rs = pst.executeQuery();
+        
+        if (rs.next()) {
+        	BookedVenue = rs.getInt(1);
+        }
+
+        rs.close();
+        pst.close();
+        conn.close();
+    } catch (Exception e) {
+        e.printStackTrace();
+    }
+    
+    
+    int Bookeddec = 0;
+    try {
+        Connection conn = DBConnection.getConnection(); // Assuming your class provides this method
+        PreparedStatement pst = conn.prepareStatement( "SELECT COUNT(decoration_id) FROM vbookings  ");
+        ResultSet rs = pst.executeQuery();
+        
+        if (rs.next()) {
+        	Bookeddec = rs.getInt(1);
+        }
+
+        rs.close();
+        pst.close();
+        conn.close();
+    } catch (Exception e) {
+        e.printStackTrace();
+    }
+    
+    int Pay = 0;
+    try {
+        Connection conn = DBConnection.getConnection(); // Assuming your class provides this method
+        PreparedStatement pst = conn.prepareStatement( "SELECT SUM(amount_paid) FROM payment  ");
+        ResultSet rs = pst.executeQuery();
+        
+        if (rs.next()) {
+        	Pay = rs.getInt(1);
+        }
+
+        rs.close();
+        pst.close();
+        conn.close();
+    } catch (Exception e) {
+        e.printStackTrace();
+    }
+    
+%>
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -77,7 +149,7 @@ h1 {
     gap: 110px; /* Space between cards */
     max-width: 800px; /* Adjusted width to prevent excessive stretching */
     padding: 20px;
-    margin: 23px 0 37px;
+    margin: 23px 0 152px;
 
 }
 
@@ -157,22 +229,22 @@ h1 {
         </div>
         <div class="card">
             <i class="fas fa-dollar-sign" onclick="window.location.href='Payment.jsp'" style="cursor: pointer;"></i>
-            <span>222K</span>
+            <span><%= Pay %></span>
             <p>Payment</p>
         </div>
         <div class="card">
             <i class="fas fa-music"  onclick="window.location.href='MusicBooked.jsp'"></i>
-            <span>12</span>
+            <span><%= MusicCount %></span>
             <p>Musician/Host</p>
         </div>
         <div class="card">
             <i class="fas fa-landmark" onclick="window.location.href='VenueBooked.jsp'"></i>
-            <span>222</span>
+            <span><%= BookedVenue %></span>
             <p>Booked Venue</p>
         </div>
         <div class="card">
             <i class="fas fa-palette"  onclick="window.location.href='DecBooked.jsp'"></i>
-            <span>12</span>
+            <span><%= BookedVenue %></span>
             <p>Decorators</p>
         </div>
     </div>

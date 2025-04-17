@@ -154,7 +154,7 @@
                     <input type="file" id="imageUpload" name="images" multiple accept="image/*" 
                            class="block w-full text-sm text-gray-500 file:mr-4 file:py-2 file:px-4 file:rounded file:border-0 file:text-sm file:font-semibold file:bg-blue-50 file:text-blue-700 hover:file:bg-blue-100"
                            onchange="previewImages(this)">
-                    <p class="mt-2 text-xs text-gray-500">Upload multiple images (JPEG/PNG), max 2MB each</p>
+                   
                 </div>
             </div>
             
@@ -195,12 +195,7 @@
                         return;
                     }
                     
-                    // Validate file size (2MB)
-                    if (file.size > 2 * 1024 * 1024) {
-                        alert('Image must be less than 2MB');
-                        input.value = '';
-                        return;
-                    }
+                   
                     
                     const reader = new FileReader();
                     const previewDiv = document.createElement('div');
