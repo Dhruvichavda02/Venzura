@@ -108,7 +108,7 @@
             <li><a href="About.jsp">About</a></li>
         </ul>
         <div class="nav-right">
-            <button class="login-btn" onclick="redirectToLogin()">Login</button>
+            
             <div class="profile-icon" onclick="redirectToAccount()">
                 <img src="https://img.icons8.com/ios-filled/50/user.png" alt="Profile">
             </div>

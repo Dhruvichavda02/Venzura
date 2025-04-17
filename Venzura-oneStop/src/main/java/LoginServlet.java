@@ -31,10 +31,13 @@ public class LoginServlet extends HttpServlet {
             ResultSet rs = checkUser.executeQuery();
 
             HttpSession session = request.getSession(); // Create session
-
+            			
             if (rs.next()) {
                 // User exists, start session
+                int userId = rs.getInt("user_id"); // Assuming 'id' is the user ID column name in your table
                 session.setAttribute("email", email);
+                session.setAttribute("user_id", userId); // Store user_id in session
+
                 response.sendRedirect("User/Home.jsp");
             } else {
                 // Invalid credentials
